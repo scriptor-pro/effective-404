@@ -101,11 +101,8 @@ Creer `404.html`:
       body {
         margin: 0;
         color: var(--ink);
-        background: radial-gradient(
-            1200px 600px at 0% -10%,
-            #dfe6f7 0%,
-            transparent 60%
-          ),
+        background:
+          radial-gradient(1200px 600px at 0% -10%, #dfe6f7 0%, transparent 60%),
           radial-gradient(900px 900px at 100% 10%, #f0e6d6 0%, transparent 55%),
           linear-gradient(135deg, var(--bg), var(--bg-2));
         font-family:
@@ -143,7 +140,8 @@ Creer `404.html`:
       .grid {
         position: absolute;
         inset: -80px;
-        background: repeating-linear-gradient(
+        background:
+          repeating-linear-gradient(
             90deg,
             rgba(31, 31, 36, 0.06) 0,
             rgba(31, 31, 36, 0.06) 1px,
@@ -564,56 +562,58 @@ export default async function handler(req) {
 }
 ```
 
-### Mini rate-limit (optionnel) avec Vercel KV
+### Mini rate-limit (optionnel) avec Upstash Redis
 
 Objectif: limiter a 1 email / IP / 5 minutes.
 
-1. Installer Vercel KV:
+1. Installer Upstash Redis:
 
 ```bash
-npm install @vercel/kv
+npm install @upstash/redis
 ```
 
-2. Ajouter les variables KV dans Vercel (Project Settings -> Environment Variables):
+2. Ajouter les variables Redis dans Vercel (Project Settings -> Environment Variables):
 
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
 
 3. Ajouter ce bloc avant l'appel a Resend:
 
 #### Node serverless (Pages Router)
 
 ```ts
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 
+const redis = Redis.fromEnv();
 const key = `rl:404:${ip}`;
 const now = Date.now();
-const last = await kv.get<number>(key);
+const last = await redis.get<number>(key);
 if (last && now - last < 5 * 60 * 1000) {
   res.status(204).end();
   return;
 }
-await kv.set(key, now, { ex: 5 * 60 });
+await redis.set(key, now, { ex: 5 * 60 });
 ```
 
 #### Edge Function (Pages Router)
 
 ```ts
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 
+const redis = Redis.fromEnv();
 const key = `rl:404:${ip}`;
 const now = Date.now();
-const last = await kv.get<number>(key);
+const last = await redis.get<number>(key);
 if (last && now - last < 5 * 60 * 1000) {
   return new Response(null, { status: 204 });
 }
-await kv.set(key, now, { ex: 5 * 60 });
+await redis.set(key, now, { ex: 5 * 60 });
 ```
 
 Notes:
 
 - L'in-memory rate-limit (Map) n'est pas fiable en serverless (instances multiples).
-- Vercel KV est la solution la plus simple si vous etes sur Vercel.
+- Upstash via Vercel Marketplace est la voie recommandee.
 
 ### Version TypeScript (Edge Function)
 

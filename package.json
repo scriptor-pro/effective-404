@@ -1,0 +1,23 @@
+{
+  "name": "404-bavarde",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scriptor-pro/effective-404.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/scriptor-pro/effective-404/issues"
+  },
+  "homepage": "https://github.com/scriptor-pro/effective-404#readme",
+  "dependencies": {
+    "@upstash/redis": "^1.36.2"
+  }
+}

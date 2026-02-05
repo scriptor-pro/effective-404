@@ -1,4 +1,6 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,12 +19,12 @@ export default async function handler(req, res) {
 
   const key = `rl:404:${ip}`;
   const now = Date.now();
-  const last = await kv.get(key);
+  const last = await redis.get(key);
   if (last && now - Number(last) < 5 * 60 * 1000) {
     res.status(204).end();
     return;
   }
-  await kv.set(key, now, { ex: 5 * 60 });
+  await redis.set(key, now, { ex: 5 * 60 });
 
   const body = req.body && typeof req.body === "object" ? req.body : {};
 
