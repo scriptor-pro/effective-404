@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>404 - Scriptor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f2ea;
+        --bg-2: #efe9df;
+        --ink: #1f1f24;
+        --muted: #5b5f6b;
+        --accent: #002fa7;
+        --card: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: radial-gradient(
+            1200px 600px at 0% -10%,
+            #dfe6f7 0%,
+            transparent 60%
+          ),
+          radial-gradient(900px 900px at 100% 10%, #f0e6d6 0%, transparent 55%),
+          linear-gradient(135deg, var(--bg), var(--bg-2));
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+      }
+      .frame {
+        max-width: 920px;
+        width: 100%;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.8),
+          rgba(255, 255, 255, 0.65)
+        );
+        border: 1px solid rgba(31, 31, 36, 0.08);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 30px 80px var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.08;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+        pointer-events: none;
+        mix-blend-mode: soft-light;
+      }
+      .grid {
+        position: absolute;
+        inset: -80px;
+        background: repeating-linear-gradient(
+            90deg,
+            rgba(31, 31, 36, 0.06) 0,
+            rgba(31, 31, 36, 0.06) 1px,
+            transparent 1px,
+            transparent 60px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(31, 31, 36, 0.06) 0,
+            rgba(31, 31, 36, 0.06) 1px,
+            transparent 1px,
+            transparent 60px
+          );
+        opacity: 0.12;
+        pointer-events: none;
+      }
+      .content {
+        position: relative;
+        display: grid;
+        gap: 18px;
+      }
+      .eyebrow {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--muted);
+      }
+      .headline {
+        font-size: clamp(36px, 7vw, 72px);
+        line-height: 1.05;
+        margin: 0;
+      }
+      .headline span {
+        color: var(--accent);
+      }
+      .desc {
+        font-size: clamp(18px, 2.3vw, 22px);
+        color: var(--muted);
+        max-width: 60ch;
+        margin: 0;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 10px;
+      }
+      .btn {
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: 1px solid rgba(31, 31, 36, 0.15);
+        background: #ffffff;
+        color: var(--ink);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          background 0.2s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(31, 31, 36, 0.3);
+        background: #f4f6fb;
+      }
+      .btn.alt {
+        background: transparent;
+      }
+      .meta {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .meta code {
+        color: var(--ink);
+        background: rgba(31, 31, 36, 0.08);
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: rise 0.7s ease forwards;
+      }
+      .reveal:nth-child(2) {
+        animation-delay: 0.05s;
+      }
+      .reveal:nth-child(3) {
+        animation-delay: 0.1s;
+      }
+      .reveal:nth-child(4) {
+        animation-delay: 0.15s;
+      }
+      .reveal:nth-child(5) {
+        animation-delay: 0.2s;
+      }
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @media (max-width: 640px) {
+        .frame {
+          padding: 28px 22px;
+        }
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="frame">
+      <div class="grid"></div>
+      <div class="grain"></div>
+      <div class="content">
+        <div class="eyebrow reveal">Scriptor.pro</div>
+        <h1 class="headline reveal">404<span>.</span> Page introuvable</h1>
+        <p class="desc reveal">
+          Cette page n'existe pas ou a ete deplacee. L'incident a ete enregistre
+          pour correction.
+        </p>
+        <div class="actions reveal">
+          <a class="btn" href="/">Retour a l'accueil</a>
+          <a class="btn alt" href="/contact">Signaler un lien</a>
+        </div>
+        <div class="meta reveal">
+          Erreur: <code>404</code> • <code id="path"></code>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.getElementById("path").textContent = window.location.pathname;
+
+      (function () {
+        var payload = {
+          url: window.location.href,
+          referrer: document.referrer || null,
+          userAgent: navigator.userAgent,
+          platform: navigator.platform || null,
+          language: navigator.language || null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+          screen: {
+            width: window.screen.width,
+            height: window.screen.height,
+            colorDepth: window.screen.colorDepth,
+          },
+          deviceMemory: navigator.deviceMemory || null,
+          hardwareConcurrency: navigator.hardwareConcurrency || null,
+          connection:
+            (navigator.connection && {
+              effectiveType: navigator.connection.effectiveType,
+              downlink: navigator.connection.downlink,
+              rtt: navigator.connection.rtt,
+            }) ||
+            null,
+          doNotTrack: navigator.doNotTrack || null,
+          cookieEnabled: navigator.cookieEnabled,
+          occurredAt: new Date().toISOString(),
+        };
+
+        fetch("/api/404-log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(function () {
+          // pas de retry sur la page 404
+        });
+      })();
+    </script>
+  </body>
+</html>
