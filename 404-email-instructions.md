@@ -388,7 +388,7 @@ export default async function handler(req, res) {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "404 <noreply@scriptor.pro>",
+      from: "404 <404@scriptor.pro>",
       to: ["bvh@somebaudy.com"],
       subject,
       text,
@@ -477,7 +477,7 @@ export default async function handler(
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "404 <noreply@scriptor.pro>",
+      from: "404 <404@scriptor.pro>",
       to: ["bvh@somebaudy.com"],
       subject,
       text,
@@ -550,7 +550,7 @@ export default async function handler(req) {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "404 <noreply@scriptor.pro>",
+      from: "404 <404@scriptor.pro>",
       to: ["bvh@somebaudy.com"],
       subject,
       text,
@@ -682,7 +682,7 @@ export default async function handler(req: Request): Promise<Response> {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "404 <noreply@scriptor.pro>",
+      from: "404 <404@scriptor.pro>",
       to: ["bvh@somebaudy.com"],
       subject,
       text,
