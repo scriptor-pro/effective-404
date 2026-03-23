@@ -240,13 +240,28 @@
           occurredAt: new Date().toISOString(),
         };
 
-        fetch("/api/404-log", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }).catch(function () {
-          // pas de retry sur la page 404
-        });
+        function sendWithRetry(attempt) {
+          attempt = attempt || 0;
+          fetch("/api/404-log", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            keepalive: true,
+          }).then(function (res) {
+            if (!res.ok && attempt < 2) {
+              setTimeout(function () {
+                sendWithRetry(attempt + 1);
+              }, Math.pow(2, attempt) * 1000);
+            }
+          }).catch(function () {
+            if (attempt < 2) {
+              setTimeout(function () {
+                sendWithRetry(attempt + 1);
+              }, Math.pow(2, attempt) * 1000);
+            }
+          });
+        }
+        sendWithRetry();
       })();
     </script>
   </body>

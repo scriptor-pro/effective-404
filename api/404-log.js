@@ -2,6 +2,13 @@ import { Redis } from "@upstash/redis";
 
 const redis = Redis.fromEnv();
 
+function log(entry) {
+  console.log(JSON.stringify({
+    ts: new Date().toISOString(),
+    ...entry,
+  }));
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).end();
@@ -17,25 +24,62 @@ export default async function handler(req, res) {
     ? ipHeader[0]
     : String(ipHeader).split(",")[0].trim();
 
-  const key = `rl:404:${ip}`;
-  const now = Date.now();
-  const last = await redis.get(key);
-  if (last && now - Number(last) < 5 * 60 * 1000) {
-    res.status(204).end();
-    return;
+  try {
+    const key = `rl:404:${ip}`;
+    const now = Date.now();
+    const last = await redis.get(key);
+    if (last && now - Number(last) < 5 * 60 * 1000) {
+      log({ level: "info", event: "rate_limited", ip });
+      res.status(204).end();
+      return;
+    }
+    await redis.set(key, now, { ex: 5 * 60 });
+  } catch (err) {
+    log({ level: "warn", event: "redis_unavailable", error: err.message });
   }
-  await redis.set(key, now, { ex: 5 * 60 });
 
-  const body = req.body && typeof req.body === "object" ? req.body : {};
+  function sanitizeString(val, max) {
+    return typeof val === "string" ? val.slice(0, max) : null;
+  }
+  function sanitizeNumber(val) {
+    return typeof val === "number" && isFinite(val) ? val : null;
+  }
+
+  const b = typeof req.body === "object" && req.body !== null ? req.body : {};
+  const safeBody = {
+    url: sanitizeString(b.url, 2000),
+    referrer: sanitizeString(b.referrer, 2000),
+    userAgent: sanitizeString(b.userAgent, 500),
+    platform: sanitizeString(b.platform, 100),
+    language: sanitizeString(b.language, 50),
+    timezone: sanitizeString(b.timezone, 100),
+    screen: b.screen && typeof b.screen === "object" ? {
+      width: sanitizeNumber(b.screen.width),
+      height: sanitizeNumber(b.screen.height),
+      colorDepth: sanitizeNumber(b.screen.colorDepth),
+    } : null,
+    deviceMemory: sanitizeNumber(b.deviceMemory),
+    hardwareConcurrency: sanitizeNumber(b.hardwareConcurrency),
+    connection: b.connection && typeof b.connection === "object" ? {
+      effectiveType: sanitizeString(b.connection.effectiveType, 20),
+      downlink: sanitizeNumber(b.connection.downlink),
+      rtt: sanitizeNumber(b.connection.rtt),
+    } : null,
+    doNotTrack: sanitizeString(b.doNotTrack, 10),
+    cookieEnabled: typeof b.cookieEnabled === "boolean" ? b.cookieEnabled : null,
+    occurredAt: sanitizeString(b.occurredAt, 30),
+  };
 
   const payload = {
-    ...body,
+    ...safeBody,
     ip,
     requestHeaders: {
       referer: req.headers["referer"] || null,
       userAgent: req.headers["user-agent"] || null,
     },
   };
+
+  log({ level: "info", event: "404_received", ip, url: payload.url });
 
   const subject = `404 sur scriptor.pro - ${payload.url || ""}`;
   const text = JSON.stringify(payload, null, 2);
@@ -50,20 +94,31 @@ export default async function handler(req, res) {
     </div>
   `;
 
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: "404 <404@scriptor.pro>",
-      to: ["bvh@somebaudy.com"],
-      subject,
-      text,
-      html,
-    }),
-  });
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "404 <404@scriptor.pro>",
+        to: ["bvh@somebaudy.com"],
+        subject,
+        text,
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      log({ level: "error", event: "email_failed", ip, url: payload.url, status: response.status, error: errorText });
+    } else {
+      log({ level: "info", event: "email_sent", ip, url: payload.url });
+    }
+  } catch (err) {
+    log({ level: "error", event: "email_failed", ip, url: payload.url, error: err.message });
+  }
 
   res.status(204).end();
 }
